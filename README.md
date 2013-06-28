@@ -42,3 +42,7 @@ The MATLAB MEX functions need to be compiled before use.. To do so, run
 
 at the command line. The location of the 'mex' executable might be OS-dependent.
 
+Further Information
+-------------------
+
+For further information, visit the [homepage of Jan Drugowitsch](http://www.lnc.ens.fr/~jdrugowi/code_ddm.html)
