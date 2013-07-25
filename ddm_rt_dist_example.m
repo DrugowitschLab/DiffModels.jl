@@ -1,4 +1,8 @@
 % script demonstrating the use of ddm_rt_dist.m and ddm_rt_dist_full.m
+%
+% Copyright (c) 2013, Jan Drugowitsch
+% All rights reserved.
+% See the file LICENSE for licensing information.
 
 figure; hold on;
 set(gca, 'defaultlinelinewidth', 1);

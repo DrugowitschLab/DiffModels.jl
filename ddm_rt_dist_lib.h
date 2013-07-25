@@ -1,4 +1,8 @@
 /**
+ * Copyright (c) 2013, Jan Drugowitsch
+ * All rights reserved.
+ * See the file LICENSE for licensing information.
+ *   
  * ddm_rt_dist_lib.h
  *
  *

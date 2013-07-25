@@ -5,6 +5,8 @@ Diffusion model first passage time distribution library.
 
 *No guarantee is provided for the correctness of the implementation.*
 
+The code is licensed under the New BSD License.
+
 Content
 -------
 

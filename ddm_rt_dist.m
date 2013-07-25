@@ -46,5 +46,9 @@ function [g1, g2] = ddm_rt_dist(mu, bound, delta_t, t_max)
 % element of g1 / g2, such that the proportion of the mass in g1 and g2
 % remains unchanged. This is useful if there is some significant portion of
 % the mass expected to occur after t_max. By default, 'mnorm' is set to 'no'.
+%
+% Copyright (c) 2013, Jan Drugowitsch
+% All rights reserved.
+% See the file LICENSE for licensing information.
 
 error('Not implemented as M-file. Make sure that mex file is complied');

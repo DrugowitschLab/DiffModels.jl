@@ -1,4 +1,8 @@
 /**
+ * Copyright (c) 2013, Jan Drugowitsch
+ * All rights reserved.
+ * See the file LICENSE for licensing information.
+ *
  * ddm_rt_dist_full.c - comuting the DDM reaction time distribution as described
  *                 in Smith (2000) "Stochastic Dynamic Models of Response Time
  *                 and Accurary: A Foundational Primer" and other sources. Drift

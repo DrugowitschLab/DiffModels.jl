@@ -41,5 +41,9 @@
 % g2 remains unchanged. This is useful if there is some significant portion
 % of the mass expected to occur after t_max. By default, 'mnorm' is set to
 % 'no'.
+%
+% Copyright (c) 2013, Jan Drugowitsch
+% All rights reserved.
+% See the file LICENSE for licensing information.
 
 error('Not implemented as M-file. Make sure that mex file is complied');
