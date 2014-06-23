@@ -5,7 +5,6 @@
 # - add version that includes time-varying variance
 # - add bounds constructors with maxt, to extend/shorten given bounds
 # - maybe define generic SymmetricBound class
-# - add constant, non-symmetric bound, constant drift series expansion version
 # - add simulation support, ev. using the Sampler framework
 
 # constants
