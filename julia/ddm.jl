@@ -96,7 +96,7 @@ immutable ConstSymDMBounds <: AbstractDMBounds
     function ConstSymDMBounds(b::Real, dt::Real)
         b > zero(b) || error("bound needs to be positive")
         dt > zero(dt) || error("dt needs to be positive")
-        new(dt, b)
+        new(float(dt), float(b))
     end
 end
 getb1(b::ConstSymDMBounds, n::Int) = b.b
@@ -104,6 +104,25 @@ getb2(b::ConstSymDMBounds, n::Int) = -b.b
 getb1g(b::ConstSymDMBounds, n::Int) = 0.0
 getb2g(b::ConstSymDMBounds, n::Int) = 0.0
 getmaxn(b::ConstSymDMBounds) = typemax(Int)
+
+
+immutable ConstDMBounds <: AbstractDMBounds
+    dt::Float64
+    b1::Float64
+    b2::Float64
+
+    function ConstDMBounds(b1::Real, b2::Real, dt::Real)
+        b1 > zero(b1) || error("b1 needs to be positive")
+        b2 < zero(b2) || error("b2 needs to be negative")
+        dt > zero(dt) || error("dt needs to be positive")
+        new(float(dt), float(b1), float(b2))
+    end
+end
+getb1(b::ConstDMBounds, n::Int) = b.b1
+getb2(b::ConstDMBounds, n::Int) = b.b2
+getb1g(b::ConstDMBounds, n::Int) = 0.0
+getb2g(b::ConstDMBounds, n::Int) = 0.0
+getmaxn(b::ConstDMBounds) = typemax(Int)
 
 
 immutable DMBounds <: AbstractDMBounds
@@ -158,7 +177,7 @@ getmaxn(b::SymDMBounds) = length(b.b)
 # first-passage-time distributions
 # -----------------------------------------------------------------------------
 
-# algorithm based on 
+# algorithm adapted from 
 #    DJ Navarro & IG Fuss (2009). Fast and accurate calculations for
 #    first-passage times in Wiener diffusion models. Journal of Mathematical
 #    Psychology, 53(4), 222-230.
@@ -178,6 +197,32 @@ function fptdist(d::ConstDMDrift, b::ConstSymDMBounds, tmax::Real, tol::Real=1.e
     for n = 2:maxn
         g1[n] = c3 * exp(-c2 * t / 2) * ftpdist_fastseries(t / c1, 0.5, tol)
         g2[n] = c4 * g1[n]
+        t += dt
+    end
+    g1, g2
+end
+
+# algorithm adapted from
+#    DJ Navarro & IG Fuss (2009). Fast and accurate calculations for
+#    first-passage times in Wiener diffusion models. Journal of Mathematical
+#    Psychology, 53(4), 222-230.
+function fptdist(d::ConstDMDrift, b::ConstDMBounds, tmax::Real, tol::Real=1.e-29)
+    tmax >= zero(tmax) || error("tmax needs to be non-negative")
+
+    dt = getdt(d)
+    @assert getdt(b) == dt
+    mu, b1, b2 = d.mu, b.b1, b.b2
+    maxn = length(0:dt:tmax)
+
+    g1, g2 = Array(Float64, maxn), Array(Float64, maxn)
+    g1[1], g2[1] = 0.0, 0.0
+    const c1, c2, w = abs2(b1 - b2), abs2(mu), -b2 / (b1 - b2)
+    const c3, c4 = exp(mu * b1) / c1, exp(mu * b2) / c1
+    t = dt
+    for n = 2:maxn
+        const mu2t, t_scaled = exp(-c2 * t / 2), t / c1
+        g1[n] = c3 * mu2t * ftpdist_fastseries(t_scaled, 1.0 - w, tol)
+        g2[n] = c4 * mu2t * ftpdist_fastseries(t_scaled, w, tol)
         t += dt
     end
     g1, g2
