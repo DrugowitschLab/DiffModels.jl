@@ -8,6 +8,13 @@
 # - add constant, non-symmetric bound, constant drift series expansion version
 # - add simulation support, ev. using the Sampler framework
 
+# constants
+
+import Base.@math_const
+
+@math_const twoπ   6.2831853071795864769 big(2.) * π
+@math_const sqrt2π 2.5066282746310005024 sqrt(big(2.)*π)
+
 # -----------------------------------------------------------------------------
 # utility functions
 # -----------------------------------------------------------------------------
@@ -151,9 +158,11 @@ getmaxn(b::SymDMBounds) = length(b.b)
 # first-passage-time distributions
 # -----------------------------------------------------------------------------
 
-# TODO: use method from
-# http://health.adelaide.edu.au/psychology/ccs/docs/pubs/2009/NavarroFuss2009.pdf
-function fptdist(d::ConstDMDrift, b::ConstSymDMBounds, tmax::Real, tol::Real=1.e-25)
+# algorithm based on 
+#    DJ Navarro & IG Fuss (2009). Fast and accurate calculations for
+#    first-passage times in Wiener diffusion models. Journal of Mathematical
+#    Psychology, 53(4), 222-230.
+function fptdist(d::ConstDMDrift, b::ConstSymDMBounds, tmax::Real, tol::Real=1.e-29)
     tmax >= zero(tmax) || error("tmax needs to be non-negative")
 
     dt = getdt(d)
@@ -161,27 +170,60 @@ function fptdist(d::ConstDMDrift, b::ConstSymDMBounds, tmax::Real, tol::Real=1.e
     mu, bound = d.mu, b.b
     maxn = length(0:dt:tmax)
 
-    # series expansion from
-    #    DR Cox & HD Miller (1977). The theory of statistic processes. CRC Press
     g1, g2 = Array(Float64, maxn), Array(Float64, maxn)
     g1[1], g2[1] = 0.0, 0.0
-    const c1 = -2d.mu * bound
-    const c2, c3 = exp(c1), bound / sqrt(2pi)
+    const c1, c2 = 4bound * bound, abs2(mu)
+    const c3, c4 = exp(mu * bound) / c1, exp(-2mu * bound)
     t = dt
     for n = 2:maxn
-        g, j, incr = 0.0, 0, tol + 1.0
-        while incr >= tol
-            const x = (2j + 1) * bound - mu * t
-            incr = (2j + 1) * exp(j * c1 - 0.5x * x / t)
-            g += j % 2 == 0 ? incr : -incr
-            j += 1
-        end
-        g *= c3 * t^-1.5
-        g1[n] = max(0.0, g)
-        g2[n] = max(0.0, c2 * g)
+        g1[n] = c3 * exp(-c2 * t / 2) * ftpdist_fastseries(t / c1, 0.5, tol)
+        g2[n] = c4 * g1[n]
         t += dt
     end
     g1, g2
+end
+
+# fpt density for mu=0, constant bounds at -0.5 and 0.5, and starting point 
+# at w, using series expansion appropriate for given t.
+# Impements Navarro & Fuss (2009), Eq. (13)
+function ftpdist_fastseries(t::Float64, w::Float64, tol::Float64)
+    const Ksin = sqrt(-2log(π * t * tol) / (π * π * t))
+    const Kexp = 2 + sqrt(-2t * log(2tol * sqrt(twoπ * t)))
+    Kexp < Ksin ? ftpdist_expseries(t, w, tol) : ftpdist_sinseries(t, w, tol)
+end
+
+# fpt density for mu=0, constant bounds at -0.5 and 0.5, and starting point 
+# at w, using series expansion that is accurate/fast for small t.
+# Implements Navarro & Fuss (2009), Eq. (6)
+function ftpdist_expseries(t::Float64, w::Float64, tol::Float64)
+    f = w * exp(-w * w / 2t)
+    k = 1
+    while true
+        c = w + 2k
+        incr = c * exp(-c * c / 2t)
+        f += incr
+        tol < abs(incr) || break
+        c = w - 2k
+        incr = c * exp(-c * c / 2t)
+        f += incr
+        tol < abs(incr) || break
+        k += 1
+    end
+    f * t^-1.5 / sqrt2π
+end
+
+# fpt density for mu=0, constant bounds at -0.5 and 0.5, and starting point 
+# at w, using series expansion that is accurate/fast for large t
+# Implements Navarro & Fuss (2009), Eq. (5)
+function ftpdist_sinseries(t::Float64, w::Float64, tol::Float64)
+    f, k = 0.0, 1
+    while true
+        incr = k * exp(-abs2(k * π) * t / 2) * sinpi(k * w)
+        f += incr
+        tol < abs(incr) || break
+        k += 1
+    end
+    f * π
 end
 
 function fptdist(d::DMDrift, b::AbstractDMBounds, tmax::Real)
@@ -201,7 +243,7 @@ function fptdist(d::DMDrift, b::AbstractDMBounds, tmax::Real)
     if maxn == 1
         return g1, g2
     end
-    const c1 = 1.0 / sqrt(2pi * dt)
+    const c1 = 1.0 / sqrt(twoπ * dt)
     b1d, b2d = getb1(b, 2) - getm(d, 2), getb2(b, 2) - getm(d, 2)
     g1[2] = - c1 * exp(- b1d * b1d / 2dt) * 
         (getb1g(b, 2) - getmu(d, 2) - b1d / dt)
