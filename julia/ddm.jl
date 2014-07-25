@@ -227,8 +227,8 @@ function fptdist(d::ConstDMDrift, b::ConstDMBounds, tmax::Real, tol::Real=1.e-29
     g1, g2
 end
 
-# fpt density for mu=0, constant bounds at -0.5 and 0.5, and starting point 
-# at w, using series expansion appropriate for given t.
+# fpt density for mu=0, constant bounds at 0 and 1, and starting point at w,
+# using series expansion appropriate for given t.
 # Impements Navarro & Fuss (2009), Eq. (13)
 function ftpdist_fastseries(t::Float64, w::Float64, tol::Float64)
     const Ksin = sqrt(-2log(π * t * tol) / (π * π * t))
@@ -236,8 +236,8 @@ function ftpdist_fastseries(t::Float64, w::Float64, tol::Float64)
     Kexp < Ksin ? ftpdist_expseries(t, w, tol) : ftpdist_sinseries(t, w, tol)
 end
 
-# fpt density for mu=0, constant bounds at -0.5 and 0.5, and starting point 
-# at w, using series expansion that is accurate/fast for small t.
+# fpt density for mu=0, constant bounds at 0 and 1, and starting point at w,
+# using series expansion that is accurate/fast for small t.
 # Implements Navarro & Fuss (2009), Eq. (6)
 function ftpdist_expseries(t::Float64, w::Float64, tol::Float64)
     f = w * exp(-w * w / 2t)
@@ -256,8 +256,8 @@ function ftpdist_expseries(t::Float64, w::Float64, tol::Float64)
     f * t^-1.5 / sqrt2π
 end
 
-# fpt density for mu=0, constant bounds at -0.5 and 0.5, and starting point 
-# at w, using series expansion that is accurate/fast for large t
+# fpt density for mu=0, constant bounds at 0 and 1, and starting point at w,
+# using series expansion that is accurate/fast for large t
 # Implements Navarro & Fuss (2009), Eq. (5)
 function ftpdist_sinseries(t::Float64, w::Float64, tol::Float64)
     f, k = 0.0, 1
