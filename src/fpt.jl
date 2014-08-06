@@ -103,7 +103,7 @@ function pdf_sinseries(t::Float64, w::Float64, tol::Float64)
 end
 
 
-function fptdist(d::AbstractDrift, b::AbstractBounds, tmax::Real)
+function pdf(d::AbstractDrift, b::AbstractBounds, tmax::Real)
     tmax >= zero(tmax) || error("tmax needs to be non-negative")
 
     dt = getdt(d)

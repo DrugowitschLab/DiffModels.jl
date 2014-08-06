@@ -3,6 +3,11 @@ module DiffModels
 import Distributions: pdf, twoπ, sqrt2π
 
 export
+    # generic types
+    AbstractDrift,
+    AbstractBound,
+    AbstractBounds,
+
     # types
     ConstDrift,
     VarDrift,
@@ -10,8 +15,10 @@ export
     VarBound,
     SymBounds,
     ConstSymBounds,
+    VarSymBounds,
     AsymBounds,
     ConstAsymBounds,
+    VarAsymBounds,
 
     # methods
     pdf

@@ -58,6 +58,8 @@ getuboundgrad(b::SymBounds, n::Int) = getboundgrad(b.b, n)
 getlboundgrad(b::SymBounds, n::Int) = -getboundgrad(b.b, n)
 getmaxn(b::SymBounds) = getmaxn(b.b)
 
+typealias VarSymBounds SymBounds{VarBound}
+
 typealias ConstSymBounds SymBounds{ConstBound}
 ConstSymBounds(b::Real, dt::Real) = ConstSymBounds(ConstBound(b, dt))
 getbound(b::ConstSymBounds) = b.b.b
