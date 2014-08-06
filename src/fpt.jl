@@ -4,19 +4,11 @@
 # - add version that includes leak
 # - add version that includes time-varying variance
 
-# constants
-
-import Base.@math_const
-
-@math_const twoπ   6.2831853071795864769 big(2.) * π
-@math_const sqrt2π 2.5066282746310005024 sqrt(big(2.)*π)
-
-
 # algorithm adapted from 
 #    DJ Navarro & IG Fuss (2009). Fast and accurate calculations for
 #    first-passage times in Wiener diffusion models. Journal of Mathematical
 #    Psychology, 53(4), 222-230.
-function fptdist(d::ConstDrift, b::ConstSymBounds, tmax::Real, tol::Real=1.e-29)
+function pdf(d::ConstDrift, b::ConstSymBounds, tmax::Real, tol::Real=1.e-29)
     tmax >= zero(tmax) || error("tmax needs to be non-negative")
 
     const dt = getdt(d)
@@ -30,7 +22,7 @@ function fptdist(d::ConstDrift, b::ConstSymBounds, tmax::Real, tol::Real=1.e-29)
     const c3, c4 = exp(mu * bound) / c1, exp(-2mu * bound)
     t = dt
     for n = 2:maxn
-        g1[n] = c3 * exp(-c2 * t / 2) * ftpdist_fastseries(t / c1, 0.5, tol)
+        g1[n] = c3 * exp(-c2 * t / 2) * pdf_fastseries(t / c1, 0.5, tol)
         g2[n] = c4 * g1[n]
         t += dt
     end
@@ -42,7 +34,7 @@ end
 #    DJ Navarro & IG Fuss (2009). Fast and accurate calculations for
 #    first-passage times in Wiener diffusion models. Journal of Mathematical
 #    Psychology, 53(4), 222-230.
-function fptdist(d::ConstDrift, b::ConstAsymBounds, tmax::Real, tol::Real=1.e-29)
+function pdf(d::ConstDrift, b::ConstAsymBounds, tmax::Real, tol::Real=1.e-29)
     tmax >= zero(tmax) || error("tmax needs to be non-negative")
 
     const dt = getdt(d)
@@ -57,8 +49,8 @@ function fptdist(d::ConstDrift, b::ConstAsymBounds, tmax::Real, tol::Real=1.e-29
     t = dt
     for n = 2:maxn
         const mu2t, t_scaled = exp(-c2 * t / 2), t / c1
-        g1[n] = c3 * mu2t * ftpdist_fastseries(t_scaled, 1.0 - w, tol)
-        g2[n] = c4 * mu2t * ftpdist_fastseries(t_scaled, w, tol)
+        g1[n] = c3 * mu2t * pdf_fastseries(t_scaled, 1.0 - w, tol)
+        g2[n] = c4 * mu2t * pdf_fastseries(t_scaled, w, tol)
         t += dt
     end
     g1, g2
@@ -68,17 +60,17 @@ end
 # fpt density for mu=0, constant bounds at 0 and 1, and starting point at w,
 # using series expansion appropriate for given t.
 # Impements Navarro & Fuss (2009), Eq. (13)
-function ftpdist_fastseries(t::Float64, w::Float64, tol::Float64)
+function pdf_fastseries(t::Float64, w::Float64, tol::Float64)
     const Ksin = sqrt(-2log(π * t * tol) / (π * π * t))
     const Kexp = 2 + sqrt(-2t * log(2tol * sqrt(twoπ * t)))
-    Kexp < Ksin ? ftpdist_expseries(t, w, tol) : ftpdist_sinseries(t, w, tol)
+    Kexp < Ksin ? pdf_expseries(t, w, tol) : pdf_sinseries(t, w, tol)
 end
 
 
 # fpt density for mu=0, constant bounds at 0 and 1, and starting point at w,
 # using series expansion that is accurate/fast for small t.
 # Implements Navarro & Fuss (2009), Eq. (6)
-function ftpdist_expseries(t::Float64, w::Float64, tol::Float64)
+function pdf_expseries(t::Float64, w::Float64, tol::Float64)
     f = w * exp(-w * w / 2t)
     k = 1
     while true
@@ -99,7 +91,7 @@ end
 # fpt density for mu=0, constant bounds at 0 and 1, and starting point at w,
 # using series expansion that is accurate/fast for large t
 # Implements Navarro & Fuss (2009), Eq. (5)
-function ftpdist_sinseries(t::Float64, w::Float64, tol::Float64)
+function pdf_sinseries(t::Float64, w::Float64, tol::Float64)
     f, k = 0.0, 1
     while true
         incr = k * exp(-abs2(k * π) * t / 2) * sinpi(k * w)
