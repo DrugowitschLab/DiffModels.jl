@@ -87,3 +87,5 @@ ConstAsymBounds(upper::Real, lower::Real, dt::Real) =
     ConstAsymBounds(ConstBound(upper, dt), ConstBound(-lower, dt))
 getubound(b::ConstAsymBounds) = getbound(b.upper)
 getlbound(b::ConstAsymBounds) = -getbound(b.lower)
+
+typealias ConstBounds Union(ConstSymBounds, ConstAsymBounds)

@@ -14,6 +14,7 @@ export
     ConstBound,
     VarBound,
     SymBounds,
+    ConstBounds,
     ConstSymBounds,
     VarSymBounds,
     AsymBounds,
@@ -21,7 +22,10 @@ export
     VarAsymBounds,
 
     # methods
-    pdf
+    pdf,
+    pdfu,
+    pdfl,
+    pdful
 
 # TODO:
 # - add simulation support, ev. using the Sampler framework

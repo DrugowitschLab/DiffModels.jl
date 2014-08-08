@@ -14,6 +14,8 @@ using Base.Test
 @test SymBounds <: AbstractBounds
 @test AsymBounds <: AbstractBounds
 @test ConstSymBounds <: AbstractBounds
+@test ConstSymBounds <: ConstBounds
 @test VarSymBounds <: AbstractBounds
 @test ConstAsymBounds <: AbstractBounds
+@test ConstAsymBounds <: ConstBounds
 @test VarAsymBounds <: AbstractBounds
