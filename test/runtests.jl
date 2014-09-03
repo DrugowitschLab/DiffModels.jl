@@ -1,6 +1,7 @@
 tests = [
     "types",
-    "fpt"]
+    "fpt",
+    "sim"]
 
 println("Running tests:")
 

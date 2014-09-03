@@ -1,6 +1,8 @@
 module DiffModels
 
-import Distributions: pdf, twoπ, sqrt2π
+import Base: rand
+import Distributions: pdf, sampler, twoπ, sqrt2π
+import Distributions: Sampleable, ValueSupport, Univariate, Multivariate
 
 export
     # generic types
@@ -20,20 +22,22 @@ export
     AsymBounds,
     ConstAsymBounds,
     VarAsymBounds,
+    DMBoundOutcome,
+    DMBoundsOutcome,
 
     # methods
+    rand,
+    sampler,
     pdf,
     pdfu,
     pdfl,
     pdful
-
-# TODO:
-# - add simulation support, ev. using the Sampler framework
 
 include("common.jl")
 include("drift.jl")
 include("bound.jl")
 include("diffusion.jl")
 include("fpt.jl")
+include("sim.jl")
 
 end # module
