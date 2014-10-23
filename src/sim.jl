@@ -147,10 +147,10 @@ immutable DMConstSymBoundsSampler
         const mu = getmu(d)
         const theta = getbound(b)
         const mutheta = theta * mu
-        fpts = mu < 1.0 ?
+        fpts = mutheta < 1.0 ?
                DMConstSymBoundsNormExpSampler(mutheta) :
                DMConstSymBoundsInvNormSampler(mutheta)
         new(abs2(theta), 1 / (1 + exp(-2mutheta)), fpts)
     end
 end
-rand(s::DMConstSymBoundsSampler) =  rand(s.fpts) * s.b2, rand() < s.pu
+rand(s::DMConstSymBoundsSampler) = rand(s.fpts) * s.b2, rand() < s.pu
