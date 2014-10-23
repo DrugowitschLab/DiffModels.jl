@@ -31,9 +31,27 @@ dmsympubound(mu::Real, bound::Real) = 1 / (1 + exp(-2mu * bound))
 
 n = 10^5
 dt = 0.001
+
+# normal/exponential sampler for small mu
+bound = 0.9
+mu = 0.5
+tmu, tvar, cmu = estimatemoments(ConstDrift(mu, dt), ConstSymBounds(bound, dt), n)
+@test_approx_eq_eps tmu dmsymmeant(mu, bound) 0.1
+@test_approx_eq_eps tvar dmsymvart(mu, bound) 0.1
+@test_approx_eq_eps cmu dmsympubound(mu, bound) 0.05
+
+# inverse-normal sampler for large mu
+bound = 0.9
+mu = 2
+tmu, tvar, cmu = estimatemoments(ConstDrift(mu, dt), ConstSymBounds(bound, dt), n)
+@test_approx_eq_eps tmu dmsymmeant(mu, bound) 0.1
+@test_approx_eq_eps tvar dmsymvart(mu, bound) 0.1
+@test_approx_eq_eps cmu dmsympubound(mu, bound) 0.05
+
+# generic sampler
 bound = 0.9
 mu = 1.1
-tmu, tvar, cmu = estimatemoments(ConstDrift(mu, dt), ConstSymBounds(bound, dt), n)
+tmu, tvar, cmu = estimatemoments(VarDrift([mu], dt, 10.0), ConstSymBounds(bound, dt), n)
 @test_approx_eq_eps tmu dmsymmeant(mu, bound) 0.1
 @test_approx_eq_eps tvar dmsymvart(mu, bound) 0.1
 @test_approx_eq_eps cmu dmsympubound(mu, bound) 0.05
