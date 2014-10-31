@@ -115,6 +115,12 @@ function rand(s::DMConstSymBoundsInvNormSampler)
     end
 end
 
+function fastfptsampler(mu)
+    const absmu = abs(mu)
+    absmu < 1.0 ? DMConstSymBoundsNormExpSampler(absmu) : 
+                  DMConstSymBoundsInvNormSampler(absmu)
+end
+
 # sampler for inverse-Gamma distribution with lambda = 1, mean = mu, mu > 0
 function _invgaussrand(mu, mu2)
     const y = abs2(randn())
@@ -147,10 +153,43 @@ immutable DMConstSymBoundsSampler
         const mu = getmu(d)
         const theta = getbound(b)
         const mutheta = theta * mu
-        fpts = mutheta < 1.0 ?
-               DMConstSymBoundsNormExpSampler(mutheta) :
-               DMConstSymBoundsInvNormSampler(mutheta)
-        new(abs2(theta), 1 / (1 + exp(-2mutheta)), fpts)
+        new(abs2(theta), 1 / (1 + exp(-2mutheta)), fastfptsampler(mutheta))
     end
 end
 rand(s::DMConstSymBoundsSampler) = rand(s.fpts) * s.b2, rand() < s.pu
+
+sampler(d::ConstDrift, b::ConstAsymBounds) = DMConstAsymBoundsSampler(d, b)
+
+immutable DMConstAsymBoundsSampler
+    mu::Float64
+    bup::Float64
+    blo::Float64
+
+    DMConstAsymBoundsSampler(d::ConstDrift, b::ConstAsymBounds) =
+        new(getmu(d), getubound(b), getlbound(b))
+end
+
+function rand(s::DMConstAsymBoundsSampler)
+    t, x = 0.0, 0.0
+    while true
+        const xlo, xup = x - s.blo, s.bup - x
+        if isapprox(xlo, xup)
+            # symmetric bounds, diffusion model in [x - xup, x + xup]
+            const mutheta = xup * s.mu
+            return abs2(xup) * rand(fastfptsampler(mutheta)),
+                   rand() < 1 / (1 + exp(-2mutheta))
+        elseif xlo > xup
+            # x closer to upper bound, diffusion model in [x - xup, x + xup]
+            const mutheta = xup * s.mu
+            t += abs2(xup) * rand(fastfptsampler(mutheta))
+            rand() >= 1 / (1 + exp(-2mutheta)) || return t, true
+            x -= xup
+        else
+            # x closer to lower bound, diffusion model in [x - xlo, x + xlo]
+            const mutheta = xlo * s.mu
+            t += abs2(xlo) * rand(fastfptsampler(mutheta))
+            rand() <= 1 / (1 + exp(-2mutheta)) || return t, false
+            x += xlo
+        end
+    end
+end
