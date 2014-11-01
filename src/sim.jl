@@ -176,7 +176,7 @@ function rand(s::DMConstAsymBoundsSampler)
         if isapprox(xlo, xup)
             # symmetric bounds, diffusion model in [x - xup, x + xup]
             const mutheta = xup * s.mu
-            return abs2(xup) * rand(fastfptsampler(mutheta)),
+            return t + abs2(xup) * rand(fastfptsampler(mutheta)),
                    rand() < 1 / (1 + exp(-2mutheta))
         elseif xlo > xup
             # x closer to upper bound, diffusion model in [x - xup, x + xup]
