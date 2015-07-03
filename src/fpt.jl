@@ -163,38 +163,34 @@ function pdf(d::AbstractDrift, b::AbstractBounds, tmax::Real)
     if maxn == 1
         return g1, g2
     end
-    const c1 = 1.0 / sqrt(twoπ * dt)
-    b1d, b2d = getubound(b, 2) - getm(d, 2), getlbound(b, 2) - getm(d, 2)
-    g1[2] = - c1 * exp(- b1d * b1d / 2dt) * 
-        (getuboundgrad(b, 2) - getmu(d, 2) - b1d / dt)
-    g2[2] = c1 * exp(- b2d * b2d / 2dt) *
-        (getlboundgrad(b, 2) - getmu(d, 2) - b2d / dt)
+
+    const cΨ = 1.0 / √(twoπ)
+    # computes diffusion kernel 2Ψ(b(t), t | y, tau) for parameters
+    # mut = drift(t), bgradt = d b(t) / dt, dbm = b(t) - y - m(t) + m(tau),
+    # dv = v(t) - v(tau), sqrtdv = √(dv)
+    _Ψ(mut, bgradt, dbm, dv, sqrtdv) =
+        cΨ * exp(-dbm * dbm / (2dv)) / sqrtdv * (bgradt - mut - dbm / dv)
+
+    g1[2] = - _Ψ(getmu(d, 2), getuboundgrad(b, 2), getubound(b, 2) - getm(d, 2), dt, √(dt))
+    g2[2] = _Ψ(getmu(d, 2), getlboundgrad(b, 2), getlbound(b, 2) - getm(d, 2), dt, √(dt))
+
     for n = 3:maxn
         g1n, g2n = 0.0, 0.0
         const mun, mn = getmu(d, n), getm(d, n)
         const bupn, blon = getubound(b, n), getlbound(b, n)
         const bupgradn, blogradn = getuboundgrad(b, n), getlboundgrad(b, n)
         for j = 2:(n-1)
-            b1d = bupn - getubound(b, j) + getm(d, j) - mn
-            b2d = bupn - getlbound(b, j) + getm(d, j) - mn
-            g1n += c1 / sqrt(n-j) * (
-                g1[j] * exp(- b1d * b1d / (2dt * (n-j))) * 
-                (bupgradn - mun - b1d / (dt * (n-j))) +
-                g2[j] * exp(- b2d * b2d / (2dt * (n-j))) *
-                (bupgradn - mun - b2d / (dt * (n-j))))
-            b1d = blon - getubound(b, j) + getm(d, j) - mn
-            b2d = blon - getlbound(b, j) + getm(d, j) - mn
-            g2n += c1 / sqrt(n-j) * (
-                g1[j] * exp(- b1d * b1d / (2dt * (n-j))) *
-                (blogradn - mun - b1d / (dt * (n-j))) +
-                g2[j] * exp(- b2d * b2d / (2dt * (n-j))) *
-                (blogradn - mun - b2d / (dt * (n-j))))
+            const dv = dt * (n-j)
+            const sqrtdv = √(dv)
+            const dbmu = getm(d, j) - mn - getubound(b, j)
+            const dbml = getm(d, j) - mn - getlbound(b, j)
+            g1n += g1[j] * _Ψ(mun, bupgradn, bupn + dbmu, dv, sqrtdv) +
+                g2[j] * _Ψ(mun, bupgradn, bupn + dbml, dv, sqrtdv)
+            g2n += g1[j] * _Ψ(mun, blogradn, blon + dbmu, dv, sqrtdv) +
+                g2[j] * _Ψ(mun, blogradn, blon + dbml, dv, sqrtdv)
         end
-        b1d, b2d = bupn - mn, blon - mn
-        g1[n] = - c1 / sqrt(n-1) * exp(- b1d * b1d / (2dt * (n-1))) *
-            (bupgradn - mun - b1d / (dt * (n-1))) + dt * g1n
-        g2[n] = c1 / sqrt(n-1) * exp(- b2d * b2d / (2dt * (n-1))) *
-            (blogradn - mun - b2d / (dt * (n-1))) - dt * g2n
+        g1[n] = - _Ψ(mun, bupgradn, bupn - mn, dt * (n-1), √(dt * (n-1))) + dt * g1n
+        g2[n] = _Ψ(mun, blogradn, blon - mn, dt * (n-1), √(dt * (n-1))) - dt * g2n
     end
     g1, g2
 end
