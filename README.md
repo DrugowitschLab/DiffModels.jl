@@ -2,6 +2,7 @@ DiffModels.jl
 =============
 
 [![Build Status](https://api.travis-ci.org/jdrugo/DiffModels.jl.svg?branch=master)](https://travis-ci.org/jdrugo/DiffModels.jl)
+[![Coverage Status](https://coveralls.io/repos/jdrugo/DiffModels.jl/badge.svg?branch=master&service=github)](https://coveralls.io/github/jdrugo/DiffModels.jl?branch=master)
 
 A Julia package for simulating diffusion models and compute their first passage time densities.
 
