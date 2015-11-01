@@ -88,4 +88,4 @@ ConstAsymBounds(upper::Real, lower::Real, dt::Real) =
 getubound(b::ConstAsymBounds) = getbound(b.upper)
 getlbound(b::ConstAsymBounds) = -getbound(b.lower)
 
-typealias ConstBounds Union(ConstSymBounds, ConstAsymBounds)
+@compat typealias ConstBounds Union{ConstSymBounds, ConstAsymBounds}

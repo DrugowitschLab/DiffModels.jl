@@ -25,14 +25,14 @@ immutable VarDrift <: AbstractDrift
     function VarDrift(mu::Vector{Float64}, dt::Real)
         dt > zero(dt) || error("dt needs to be positive")
         length(mu) > 0 || error("mu needs to be of non-zero length")
-        new(mu, [0.0, cumsum(mu[1:(end-1)]) * float(dt)], float(dt))
+        new(mu, [0.0; cumsum(mu[1:(end-1)]) * float(dt)], float(dt))
     end
     function VarDrift(mu::Vector{Float64}, dt::Real, maxt::Real)
         dt > zero(dt) || error("dt needs to be positive")
         maxt >= dt || error("maxt needs to be at least as large as dt")
         n = length(0:dt:maxt)
         nmu = length(mu)
-        nmu < n ? VarDrift([mu, fill(mu[end], n - nmu)], dt) : VarDrift(mu[1:n], dt)
+        nmu < n ? VarDrift([mu; fill(mu[end], n - nmu)], dt) : VarDrift(mu[1:n], dt)
     end
 end
 getmu(d::VarDrift, n::Int) = d.mu[n]
