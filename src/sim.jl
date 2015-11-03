@@ -105,8 +105,8 @@ function rand(s::DMConstSymBoundsInvNormSampler)
         t = _invgaussrand(s.invabsmu, s.invmu2)
         const one2t = 1 / 2t
         if t < 2.5
-            # short-time series
-            !_acceptt(t, exp(-one2t), one2t) || return t
+            # short-time series, always accept for mu > 1500
+            !_acceptt(t, exp(-one2t), one2t) && !(s.invabsmu < 0.000666) || return t
         else
             # long-time series
             const Cl = -log(π/4) - 0.5log(twoπ)
