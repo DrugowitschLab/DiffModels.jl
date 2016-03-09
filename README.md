@@ -104,15 +104,17 @@ References
 
 In general, the library computes the first-passage time densities by finding the solution to an integral equation, as described in
 
-Smith PL (2000). Stochastic Dynamic Models of Response Time and Accuracy: A Foundational Primer. *Journal of Mathematical Psychology*, 44 (3). 408-463.
+Smith PL (2000). [Stochastic Dynamic Models of Response Time and Accuracy: A Foundational Primer](http://dx.doi.org/10.1006/jmps.1999.1260). *Journal of Mathematical Psychology*, 44 (3). 408-463.
 
-For constant drift and bounds, it instead uses a much faster method, based on an infinite series expansion of these densities, as described in.
+For constant drift and bounds, it instead uses a much faster method, based on an infinite series expansion of these densities, as described in
 
 Cox DR and Miller HD (1965). *The Theory of Stochastic Processes*. John Wiley & Sons, Inc.
 
 and
 
-Navarro DJ and Fuss IG (2009). Fast and accurate calculations for first-passage times in Wiener diffusion models. *Journal of Mathematical Psychology*, 53, 222-230.
+Navarro DJ and Fuss IG (2009). [Fast and accurate calculations for first-passage times in Wiener diffusion models](http://dx.doi.org/10.1016/j.jmp.2009.02.003). *Journal of Mathematical Psychology*, 53, 222-230.
 
-Samples are in the most general case drawn by simulating trajectories by the Euler–Maruyama method. For diffusion models with constant drift and (symmetric or asymmetric) boundaries, a significantly faster method based on rejection sampling is used.
+Samples are in the most general case drawn by simulating trajectories by the Euler–Maruyama method. For diffusion models with constant drift and (symmetric or asymmetric) boundaries, the following significantly faster method based on rejection sampling is used:
+
+Drugowitsch J (2016). [Fast and accurate Monte Carlo sampling of first-passage times from Wiener diffusion models](http://dx.doi.org/10.1038/srep20490). *Scientific Reports* 6, 20490; doi: 10.1038/srep20490.
 
