@@ -48,17 +48,21 @@ immutable LinearBound <: AbstractBound
     bslope::Float64
     dtbslope::Float64
     dt::Float64
+    maxn::Int
 
-    function LinearBound(b0::Real, bslope::Real, dt::Real)
+    function LinearBound(b0::Real, bslope::Real, dt::Real, maxt::Real=Inf)
         dt > zero(dt) || error("dt needs to be positive")
         b0 > zero(dt) || error("b0 needs to be positive")
+        maxt > zero(maxt) || error("maxt needs to be positive")
+        maxn = maxt / dt
         # subtracting dt * bslope ensures that getbound(b, 1) = b0
-        new(b0 - dt * bslope, bslope, dt * bslope, dt)
+        new(b0 - dt * bslope, bslope, dt * bslope, dt,
+            isfinite(maxn) ? ceil(Int, maxn) : typemax(Int))
     end
 end
 getbound(b::LinearBound, n::Int) = b.b0 + n * b.dtbslope
 getboundgrad(b::LinearBound, n::Int) = b.bslope
-getmaxn(b::LinearBound) = typemax(Int)
+getmaxn(b::LinearBound) = b.maxn
 
 
 # bound pairs
