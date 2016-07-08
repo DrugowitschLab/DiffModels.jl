@@ -28,14 +28,16 @@ immutable VarBound <: AbstractBound
     bg::Vector{Float64}
     dt::Float64
 
-    function VarBound(b::Vector{Float64}, bg::Vector{Float64}, dt::Real)
+    function VarBound{T1 <: Real, T2 <: Real}(b::AbstractVector{T1},
+                                              bg::AbstractVector{T2},
+                                              dt::Real)
         dt > zero(dt) || error("dt needs to be positive")
         length(b) > 0 || error("bounds need to be of non-zero length")
         length(b) == length(bg) || error("b and bg need to be of same length")
         b[1] > 0.0 || error("b[1] needs to be positive")
         new(b, bg, float(dt))
     end
-    VarBound(b::Vector{Float64}, dt::Real) = VarBound(b, fdgrad(b, dt), dt)
+    VarBound{T <: Real}(b::AbstractVector{T}, dt::Real) = VarBound(b, fdgrad(b, dt), dt)
 end
 getbound(b::VarBound, n::Int) = b.b[n]
 getboundgrad(b::VarBound, n::Int) = b.bg[n]

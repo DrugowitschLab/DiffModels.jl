@@ -59,7 +59,7 @@ immutable DMConstSymBoundsNormExpSampler <: DMConstSymBoundsFPTSampler
     F1lt::Float64
     F1inf::Float64
 
-    function DMConstSymBoundsNormExpSampler(mu::Float64)
+    function DMConstSymBoundsNormExpSampler(mu::Real)
         const mu2 = abs2(mu)
         const tthresh = 0.12+0.5exp(-abs(mu)/3)
         const a = (3 + √(9 + 4mu2)) / 6
@@ -94,7 +94,7 @@ immutable DMConstSymBoundsInvNormSampler <: DMConstSymBoundsFPTSampler
     invabsmu::Float64
     invmu2::Float64
 
-    function DMConstSymBoundsInvNormSampler(mu::Float64)
+    function DMConstSymBoundsInvNormSampler(mu::Real)
         @assert mu > 0.0
         new(1 / abs(mu), 1 / abs2(mu))
     end

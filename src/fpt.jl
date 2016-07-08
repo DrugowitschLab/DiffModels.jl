@@ -31,21 +31,21 @@ immutable AsymPDFConstCache <: PDFConstCacheBase
     end
 end
 
-pdful(c::PDFConstCacheBase, t::Float64, tol::Real=1.e-29) =
+pdful(c::PDFConstCacheBase, t::Real, tol::Real=1.e-29) =
     pdfu(c, t, tol), pdfl(c, t, tol)
-pdfu(c::AsymPDFConstCache, t::Float64, tol::Real=1.e-29) =
+pdfu(c::AsymPDFConstCache, t::Real, tol::Real=1.e-29) =
     exp(c.c3 - c.c2 * t) / c.c1 * pdf_asymfastseries(t / c.c1, 1 - c.w, tol)
-pdfl(c::AsymPDFConstCache, t::Float64, tol::Real=1.e-29) =
+pdfl(c::AsymPDFConstCache, t::Real, tol::Real=1.e-29) =
     exp(c.c4 - c.c2 * t) / c.c1 * pdf_asymfastseries(t / c.c1, c.w, tol)
 
 # fpt density for mu=0, constant bounds at 0 and 1, and starting point at w
-pdf_asymfastseries(t::Float64, w::Float64, tol::Float64) = 
+pdf_asymfastseries(t::Real, w::Real, tol::Real) = 
     t == 0.0 ? 0.0 :
         useshorttseries(t, tol) ? pdf_asymshortt(t, w, tol) : 
                                   pdf_asymlongt(t, w, tol)
 
 # Navarro & Fuss (2009), Eq. (6)
-function pdf_asymshortt(t::Float64, w::Float64, tol::Float64)
+function pdf_asymshortt(t::Real, w::Real, tol::Real)
     const b = t^-1.5 / sqrt2π
     tol *= b
     f = w * exp(-w * w / 2t)
@@ -65,7 +65,7 @@ function pdf_asymshortt(t::Float64, w::Float64, tol::Float64)
 end
 
 # Navarro & Fuss (2009), Eq. (5)
-function pdf_asymlongt(t::Float64, w::Float64, tol::Float64)
+function pdf_asymlongt(t::Real, w::Real, tol::Real)
     tol *= π
     f, k = 0.0, 1
     while true
@@ -88,23 +88,23 @@ immutable SymPDFConstCache <: PDFConstCacheBase
     end
 end
 
-function pdful(c::SymPDFConstCache, t::Float64, tol::Real=1.e-29)
+function pdful(c::SymPDFConstCache, t::Real, tol::Real=1.e-29)
     const g = pdf_symfastseries(t / c.c1, tol) / c.c1
     exp(c.c3 - c.c2 * t) * g, exp(- c.c3 - c.c2 * t) * g
 end
-pdfu(c::SymPDFConstCache, t::Float64, tol::Real=1.e-29) =
+pdfu(c::SymPDFConstCache, t::Real, tol::Real=1.e-29) =
     exp(c.c3 - c.c2 * t) / c.c1 * pdf_symfastseries(t / c.c1, tol)
-pdfl(c::SymPDFConstCache, t::Float64, tol::Real=1.e-29) =
+pdfl(c::SymPDFConstCache, t::Real, tol::Real=1.e-29) =
     exp(- c.c3 - c.c2 * t) / c.c1 * pdf_symfastseries(t / c.c1, tol)
 
 # fpt density for mu=0, constant bounds at 0 and 1, and starting point at 0.5,
-pdf_symfastseries(t::Float64, tol::Float64) =
+pdf_symfastseries(t::Real, tol::Real) =
     t == 0.0 ? 0.0 :
         useshorttseries(t, tol) ?
             pdf_symseries(t, 1 / 8t, 1 / sqrt(8 * π * t^3), tol) :
             pdf_symseries(t, t * abs2(π) / 2, float(π), tol)
 
-function pdf_symseries(t::Float64, a::Float64, b::Float64, tol::Float64)
+function pdf_symseries(t::Real, a::Real, b::Real, tol::Real)
     tol *= b
     f, twok = exp(-a), 3
     while true
@@ -123,9 +123,9 @@ end
 PDFConstCache(d::ConstDrift, b::ConstAsymBounds) = AsymPDFConstCache(d, b)
 PDFConstCache(d::ConstDrift, b::ConstSymBounds) = SymPDFConstCache(d, b)
 
-pdfu(d::ConstDrift, b::ConstBounds, t::Float64, tol::Real=1.e-29) = pdfu(PDFConstCache(d, b), t, tol)
-pdfl(d::ConstDrift, b::ConstBounds, t::Float64, tol::Real=1.e-29) = pdfl(PDFConstCache(d, b), t, tol)
-pdful(d::ConstDrift, b::ConstBounds, t::Float64, tol::Real=1.e-29) = pdful(PDFConstCache(d, b), t, tol)
+pdfu(d::ConstDrift, b::ConstBounds, t::Real, tol::Real=1.e-29) = pdfu(PDFConstCache(d, b), t, tol)
+pdfl(d::ConstDrift, b::ConstBounds, t::Real, tol::Real=1.e-29) = pdfl(PDFConstCache(d, b), t, tol)
+pdful(d::ConstDrift, b::ConstBounds, t::Real, tol::Real=1.e-29) = pdful(PDFConstCache(d, b), t, tol)
 
 function pdf(d::ConstDrift, b::ConstBounds, tmax::Real, tol::Real=1.e-29)
     tmax >= zero(tmax) || error("tmax needs to be non-negative")
