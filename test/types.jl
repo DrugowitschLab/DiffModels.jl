@@ -10,6 +10,7 @@ using Base.Test
 
 @test ConstBound <: AbstractBound
 @test VarBound <: AbstractBound
+@test LinearBound <: AbstractBound
 
 @test SymBounds <: AbstractBounds
 @test AsymBounds <: AbstractBounds

@@ -41,6 +41,23 @@ getbound(b::VarBound, n::Int) = b.b[n]
 getboundgrad(b::VarBound, n::Int) = b.bg[n]
 getmaxn(b::VarBound) = length(b.b)
 
+immutable LinearBound <: AbstractBound
+    b0::Float64
+    bslope::Float64
+    dtbslope::Float64
+    dt::Float64
+
+    function LinearBound(b0::Real, bslope::Real, dt::Real)
+        dt > zero(dt) || error("dt needs to be positive")
+        b0 > zero(dt) || error("b0 needs to be positive")
+        # subtracting dt * bslope ensures that getbound(b, 1) = b0
+        new(b0 - dt * bslope, bslope, dt * bslope, dt)
+    end
+end
+getbound(b::LinearBound, n::Int) = b.b0 + n * b.dtbslope
+getboundgrad(b::LinearBound, n::Int) = b.bslope
+getmaxn(b::LinearBound) = typemax(Int)
+
 
 # bound pairs
 
@@ -63,6 +80,9 @@ typealias VarSymBounds SymBounds{VarBound}
 typealias ConstSymBounds SymBounds{ConstBound}
 ConstSymBounds(b::Real, dt::Real) = ConstSymBounds(ConstBound(b, dt))
 getbound(b::ConstSymBounds) = b.b.b
+
+typealias LinearSymBounds SymBounds{LinearBound}
+LinearSymBounds(b0::Real, bslope::Real, dt::Real) = LinearSymBounds(LinearBound(b0, bslope, dt))
 
 immutable AsymBounds{T1 <: AbstractBound, T2 <: AbstractBound} <: AbstractBounds
     upper::T1

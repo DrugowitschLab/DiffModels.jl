@@ -36,7 +36,7 @@ julia> Pkg.clone("git://github.com/jdrugo/DiffModels.jl.git")
 Usage
 -----
 
-The library is based on assembling diffusion models from drift and boundary specifications. If not constant, all drifts/boundaries are specified by vectors in time steps of *dt*. In most cases, these vectors need to be sufficiently long to cover the whole time of relevance. The first-passage times cannot computed beyond the this time, and can samples be drawn after it. This restriction does not apply to time-invariant drifts/bounds, which do not feature this limitation.
+The library is based on assembling diffusion models from drift and boundary specifications. If not constant, all drifts/boundaries are specified by vectors in time steps of *dt*, with the first vector element corresponding to *t=0*. In most cases, these vectors need to be sufficiently long to cover the whole time of relevance. The first-passage times cannot computed beyond this time, and samples cannot be drawn after it. This restriction does not apply to time-invariant drifts/bounds, which do not feature this limitation.
 
 ### Drift
 
@@ -53,15 +53,17 @@ VarDrift(mu::Vector{Float64}, dt::Real, maxt::Real)
 The available boundaries are defined in [src/bound.jl](src/bound.jl). Single boundaries are based on the abstract base class 'AbstractBound'. For such boundaries, the following constructors are available:
 ```Julia
 ConstBound(b::Real, dt::Real)
+LinearBound(b0::Real, bslope::Real, dt::Real)
 VarBound(b::Vector{Float64}, bg::Vector{Float64}, dt::Real)
 VarBound(b::Vector{Float64}, dt::Real)
 ```
-'ConstBound' is a constant boundary at `b`. `VarBound` is a time-varying boundary that changes over time according to the vector `b` in steps of `dt`. `bg` is its time derivative, and needs to contain the same number of elements as `b`. If not specified (last constructor), it is estimated from `b` by finite differences.
+`ConstBound` is a constant boundary at `b`. `LinearBound` is a linearly changing boundary that, at time `t` is located at `b0 + t * bslope`. `VarBound` is a time-varying boundary that changes over time according to the vector `b` in steps of `dt`. `bg` is its time derivative, and needs to contain the same number of elements as `b`. If not specified (last constructor), it is estimated from `b` by finite differences.
 
 Boundary pairs are based on the abstract base class `AbstractBounds`. For such pairs, the following constructors are available:
 ```Julia
 SymBounds{T <: AbstractBound}(b::T)
 typealias VarSymBounds SymBounds{VarBound}
+typealias LinearSymBounds SymBounds{LinearBound}
 typealias ConstSymBounds SymBounds{ConstBound}
 
 AsymBounds{T1 <: AbstractBound, T2 <: AbstractBound}(upper::T1, lower::T2)
@@ -117,4 +119,3 @@ Navarro DJ and Fuss IG (2009). [Fast and accurate calculations for first-passage
 Samples are in the most general case drawn by simulating trajectories by the Euler–Maruyama method. For diffusion models with constant drift and (symmetric or asymmetric) boundaries, the following significantly faster method based on rejection sampling is used:
 
 Drugowitsch J (2016). [Fast and accurate Monte Carlo sampling of first-passage times from Wiener diffusion models](http://dx.doi.org/10.1038/srep20490). *Scientific Reports* 6, 20490; doi: 10.1038/srep20490.
-
