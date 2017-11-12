@@ -6,7 +6,7 @@
 function fdgrad{T}(x::AbstractVector{T}, dt::Real)
     const n = length(x)
     GType = typeof((zero(T) - zero(T)) / dt)
-    g = Array(GType, n)
+    g = Array{GType}(n)
     if n == 1
         g[1] = zero(GType)
     else

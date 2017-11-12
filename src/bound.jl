@@ -5,10 +5,10 @@
 
 # single bounds
 
-abstract AbstractBound
+abstract type AbstractBound end
 getdt(b::AbstractBound) = b.dt
 
-immutable ConstBound <: AbstractBound
+struct ConstBound <: AbstractBound
     b::Float64
     dt::Float64
 
@@ -23,7 +23,7 @@ getbound(b::ConstBound) = b.b
 getboundgrad(b::ConstBound, n::Int) = 0.0
 getmaxn(b::ConstBound) = typemax(Int)
 
-immutable VarBound <: AbstractBound
+struct VarBound <: AbstractBound
     b::Vector{Float64}
     bg::Vector{Float64}
     dt::Float64
@@ -43,7 +43,7 @@ getbound(b::VarBound, n::Int) = b.b[n]
 getboundgrad(b::VarBound, n::Int) = b.bg[n]
 getmaxn(b::VarBound) = length(b.b)
 
-immutable LinearBound <: AbstractBound
+struct LinearBound <: AbstractBound
     b0::Float64
     bslope::Float64
     dtbslope::Float64
@@ -67,12 +67,12 @@ getmaxn(b::LinearBound) = b.maxn
 
 # bound pairs
 
-abstract AbstractBounds
+abstract type AbstractBounds end
 
-immutable SymBounds{T <: AbstractBound} <: AbstractBounds
+struct SymBounds{T <: AbstractBound} <: AbstractBounds
     b::T
 
-    SymBounds(b::T) = new(b)
+    SymBounds{T}(b::T) where T = new(b)
 end
 getdt(b::SymBounds) = getdt(b.b)
 getubound(b::SymBounds, n::Int) = getbound(b.b, n)
@@ -81,20 +81,20 @@ getuboundgrad(b::SymBounds, n::Int) = getboundgrad(b.b, n)
 getlboundgrad(b::SymBounds, n::Int) = -getboundgrad(b.b, n)
 getmaxn(b::SymBounds) = getmaxn(b.b)
 
-typealias VarSymBounds SymBounds{VarBound}
+const VarSymBounds = SymBounds{VarBound}
 
-typealias ConstSymBounds SymBounds{ConstBound}
+const ConstSymBounds = SymBounds{ConstBound}
 ConstSymBounds(b::Real, dt::Real) = ConstSymBounds(ConstBound(b, dt))
 getbound(b::ConstSymBounds) = b.b.b
 
-typealias LinearSymBounds SymBounds{LinearBound}
+const LinearSymBounds = SymBounds{LinearBound}
 LinearSymBounds(b0::Real, bslope::Real, dt::Real) = LinearSymBounds(LinearBound(b0, bslope, dt))
 
-immutable AsymBounds{T1 <: AbstractBound, T2 <: AbstractBound} <: AbstractBounds
+struct AsymBounds{T1 <: AbstractBound, T2 <: AbstractBound} <: AbstractBounds
     upper::T1
     lower::T2
 
-    function AsymBounds(upper::T1, lower::T2)
+    function AsymBounds{T1,T2}(upper::T1, lower::T2) where {T1,T2}
         getdt(upper) == getdt(lower) || error("Bounds need to have equal dt")
         new(upper, lower)
     end
@@ -106,12 +106,12 @@ getuboundgrad(b::AsymBounds, n::Int) = getboundgrad(b.upper, n)
 getlboundgrad(b::AsymBounds, n::Int) = -getboundgrad(b.lower, n)
 getmaxn(b::AsymBounds) = min(getmaxn(b.upper), getmaxn(b.lower))
 
-typealias VarAsymBounds AsymBounds{VarBound, VarBound}
+const VarAsymBounds = AsymBounds{VarBound, VarBound}
 
-typealias ConstAsymBounds AsymBounds{ConstBound, ConstBound}
+const ConstAsymBounds = AsymBounds{ConstBound, ConstBound}
 ConstAsymBounds(upper::Real, lower::Real, dt::Real) =
     ConstAsymBounds(ConstBound(upper, dt), ConstBound(-lower, dt))
 getubound(b::ConstAsymBounds) = getbound(b.upper)
 getlbound(b::ConstAsymBounds) = -getbound(b.lower)
 
-@compat typealias ConstBounds Union{ConstSymBounds, ConstAsymBounds}
+const ConstBounds = Union{ConstSymBounds, ConstAsymBounds}

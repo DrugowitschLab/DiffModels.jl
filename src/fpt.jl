@@ -16,9 +16,9 @@ useshorttseries(t::Real, tol::Real) =
   2 + sqrt(-2t * log(2tol * sqrt(twoπ * t))) <
   sqrt(-2log(π * t * tol) / (t * abs2(π)))
 
-abstract PDFConstCacheBase
+abstract type PDFConstCacheBase end
 
-immutable AsymPDFConstCache <: PDFConstCacheBase
+struct AsymPDFConstCache <: PDFConstCacheBase
     c1::Float64
     c2::Float64
     c3::Float64
@@ -77,7 +77,7 @@ function pdf_asymlongt(t::Real, w::Real, tol::Real)
     f * π
 end
 
-immutable SymPDFConstCache <: PDFConstCacheBase
+struct SymPDFConstCache <: PDFConstCacheBase
     c1::Float64
     c2::Float64
     c3::Float64
@@ -134,7 +134,7 @@ function pdf(d::ConstDrift, b::ConstBounds, tmax::Real, tol::Real=1.e-29)
     @assert getdt(b) == dt
     const maxn = length(0:dt:tmax)
 
-    gu, gl, t = Array(Float64, maxn), Array(Float64, maxn), 0.0
+    gu, gl, t = Array{Float64}(maxn), Array{Float64}(maxn), 0.0
     for n = 1:maxn
         gu[n], gl[n] = pdful(c, t, tol)
         t += dt
@@ -158,7 +158,7 @@ function pdf(d::AbstractDrift, b::AbstractBounds, tmax::Real)
     maxn = length(0:dt:tmax)
     @assert getmaxn(d) >= maxn && getmaxn(b) >= maxn
 
-    g1, g2 = Array(Float64, maxn), Array(Float64, maxn)
+    g1, g2 = Array{Float64}(maxn), Array{Float64}(maxn)
     g1[1], g2[1] = 0.0, 0.0
     if maxn == 1
         return g1, g2

@@ -1,9 +1,9 @@
 # constant and time-varying drifts
 
-abstract AbstractDrift
+abstract type AbstractDrift end
 getdt(drift::AbstractDrift) = drift.dt
 
-immutable ConstDrift <: AbstractDrift
+struct ConstDrift <: AbstractDrift
     mu::Float64
     dt::Float64
 
@@ -17,7 +17,7 @@ getmu(d::ConstDrift) = d.mu
 getm(d::ConstDrift, n::Int) = (n-1) * d.dt * d.mu
 getmaxn(d::ConstDrift) = typemax(Int)
 
-immutable VarDrift <: AbstractDrift
+struct VarDrift <: AbstractDrift
     mu::Vector{Float64}
     m::Vector{Float64}
     dt::Float64

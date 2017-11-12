@@ -7,8 +7,8 @@
 using DiffModels
 using Base.Test
 
-nanmean(x) = mean(x[!isnan(x)])
-nanvar(x) = var(x[!isnan(x)])
+nanmean(x) = mean(x[.!isnan.(x)])
+nanvar(x) = var(x[.!isnan.(x)])
 
 function estimatemoments(d::AbstractDrift, b::AbstractBounds, n)
     t = fill(NaN, n)
@@ -43,25 +43,25 @@ dt = 0.001
 bound = 0.9
 mu = 0.5
 m = estimatemoments(ConstDrift(mu, dt), ConstSymBounds(bound, dt), n)
-@test_approx_eq_eps m[1] dmsymmeant(mu, bound) 0.1
-@test_approx_eq_eps m[2] dmsymvart(mu, bound) 0.1
-@test_approx_eq_eps m[3] dmsympubound(mu, bound) 0.05
+@test m[1] ≈ dmsymmeant(mu, bound) atol=0.1
+@test m[2] ≈ dmsymvart(mu, bound) atol=0.1
+@test m[3] ≈ dmsympubound(mu, bound) atol=0.05
 
 # inverse-normal sampler for large mu
 bound = 0.9
 mu = 2
 m = estimatemoments(ConstDrift(mu, dt), ConstSymBounds(bound, dt), n)
-@test_approx_eq_eps m[1] dmsymmeant(mu, bound) 0.1
-@test_approx_eq_eps m[2] dmsymvart(mu, bound) 0.1
-@test_approx_eq_eps m[3] dmsympubound(mu, bound) 0.05
+@test m[1] ≈ dmsymmeant(mu, bound) atol=0.1
+@test m[2] ≈ dmsymvart(mu, bound) atol=0.1
+@test m[3] ≈ dmsympubound(mu, bound) atol=0.05
 
 # generic sampler
 bound = 0.9
 mu = 1.1
 m = estimatemoments(VarDrift([mu], dt, 15.0), ConstSymBounds(bound, dt), n)
-@test_approx_eq_eps m[1] dmsymmeant(mu, bound) 0.1
-@test_approx_eq_eps m[2] dmsymvart(mu, bound) 0.1
-@test_approx_eq_eps m[3] dmsympubound(mu, bound) 0.05
+@test m[1] ≈ dmsymmeant(mu, bound) atol=0.1
+@test m[2] ≈ dmsymvart(mu, bound) atol=0.1
+@test m[3] ≈ dmsympubound(mu, bound) atol=0.05
 
 # asymmetric bounds
 
@@ -79,15 +79,15 @@ blo = -1.5
 bup = 1.0
 mu = 1.1
 m = estimatemoments(ConstDrift(mu, dt), ConstAsymBounds(bup, blo, dt), n)
-@test_approx_eq_eps m[3] dmasympubound(mu, blo, bup) 0.05
-@test_approx_eq_eps m[4] dmasymmeantup(mu, blo, bup) 0.1
-@test_approx_eq_eps m[6] dmasymmeantlo(mu, blo, bup) 0.1
+@test m[3] ≈ dmasympubound(mu, blo, bup) atol=0.05
+@test m[4] ≈ dmasymmeantup(mu, blo, bup) atol=0.1
+@test m[6] ≈ dmasymmeantlo(mu, blo, bup) atol=0.1
 
 # generic sampler
 blo = -1.5
 bup = 1.0
 mu = 1.1
 m = estimatemoments(VarDrift([mu], dt, 15.0), ConstAsymBounds(bup, blo, dt), n)
-@test_approx_eq_eps m[3] dmasympubound(mu, blo, bup) 0.05
-@test_approx_eq_eps m[4] dmasymmeantup(mu, blo, bup) 0.1
-@test_approx_eq_eps m[6] dmasymmeantlo(mu, blo, bup) 0.1
+@test m[3] ≈ dmasympubound(mu, blo, bup) atol=0.05
+@test m[4] ≈ dmasymmeantup(mu, blo, bup) atol=0.1
+@test m[6] ≈ dmasymmeantlo(mu, blo, bup) atol=0.1

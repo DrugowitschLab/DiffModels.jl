@@ -1,10 +1,10 @@
 # diffusion model samples
 
-type DMBoundOutcome  <: ValueSupport end
-type DMBoundsOutcome <: ValueSupport end
+struct DMBoundOutcome  <: ValueSupport end
+struct DMBoundsOutcome <: ValueSupport end
 
-typealias DMBoundSampleable  Sampleable{Univariate, DMBoundOutcome}
-typealias DMBoundsSampleable Sampleable{Multivariate, DMBoundsOutcome}
+const DMBoundSampleable = Sampleable{Univariate, DMBoundOutcome}
+const DMBoundsSampleable = Sampleable{Multivariate, DMBoundsOutcome}
 
 Base.eltype(::Type{DMBoundOutcome}) = Float64
 Base.eltype(::Type{DMBoundsOutcome}) = Float64, Bool
@@ -16,7 +16,7 @@ Base.length(::DMBoundsSampleable) = 2
 
 sampler(d::AbstractDrift, b::AbstractBounds) = DMBoundsSampler(d, b)
 
-immutable DMBoundsSampler
+struct DMBoundsSampler
     d::AbstractDrift
     b::AbstractBounds
     sqrtdt::Float64
@@ -46,9 +46,9 @@ end
 # faster sampler for constant bounds
 
 # samples only fpt, assumes bounds at -1, 1, unit variance
-abstract DMConstSymBoundsFPTSampler
+abstract type DMConstSymBoundsFPTSampler end
 
-immutable DMConstSymBoundsNormExpSampler <: DMConstSymBoundsFPTSampler
+struct DMConstSymBoundsNormExpSampler <: DMConstSymBoundsFPTSampler
     mu2::Float64
     a::Float64
     sqrtamu::Float64
@@ -90,7 +90,7 @@ function rand(s::DMConstSymBoundsNormExpSampler)
     end
 end
 
-immutable DMConstSymBoundsInvNormSampler <: DMConstSymBoundsFPTSampler
+struct DMConstSymBoundsInvNormSampler <: DMConstSymBoundsFPTSampler
     invabsmu::Float64
     invmu2::Float64
 
@@ -144,7 +144,7 @@ end
 
 sampler(d::ConstDrift, b::ConstSymBounds) = DMConstSymBoundsSampler(d, b)
 
-immutable DMConstSymBoundsSampler
+struct DMConstSymBoundsSampler
     b2::Float64
     pu::Float64
     fpts::DMConstSymBoundsFPTSampler
@@ -160,7 +160,7 @@ rand(s::DMConstSymBoundsSampler) = rand(s.fpts) * s.b2, rand() < s.pu
 
 sampler(d::ConstDrift, b::ConstAsymBounds) = DMConstAsymBoundsSampler(d, b)
 
-immutable DMConstAsymBoundsSampler
+struct DMConstAsymBoundsSampler
     mu::Float64
     bup::Float64
     blo::Float64

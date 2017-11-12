@@ -1,14 +1,17 @@
 DiffModels.jl
 =============
 
-[![Build Status](https://api.travis-ci.org/jdrugo/DiffModels.jl.svg?branch=master)](https://travis-ci.org/jdrugo/DiffModels.jl)
-[![Coverage Status](https://coveralls.io/repos/jdrugo/DiffModels.jl/badge.svg?branch=master&service=github)](https://coveralls.io/github/jdrugo/DiffModels.jl?branch=master)
+[![Build Status](https://travis-ci.org/DrugowitschLab/DiffModels.jl.svg?branch=master)](https://travis-ci.org/DrugowitschLab/DiffModels.jl)
+
+[![Coverage Status](https://coveralls.io/repos/DrugowitschLab/DiffModels.jl/badge.svg?branch=master&service=github)](https://coveralls.io/github/DrugowitschLab/DiffModels.jl?branch=master)
+
+[![codecov.io](http://codecov.io/github/DrugowitschLab/DiffModels.jl/coverage.svg?branch=master)](http://codecov.io/github/DrugowitschLab/DiffModels.jl?branch=master)
 
 A Julia package for simulating diffusion models and compute their first passage time densities.
 
 *No guarantee is provided for the correctness of the implementation.*
 
-The code is licensed under the New BSD License.
+The code is licensed under the MIT License.
 
 Content
 -------
@@ -30,7 +33,7 @@ Installation
 
 The easiest way to install DiffModels.jl is by using the Julia Package Manager at the Julia prompt:
 ```
-julia> Pkg.clone("git://github.com/jdrugo/DiffModels.jl.git")
+julia> Pkg.clone("git://github.com/DrugowitschLab/DiffModels.jl.git")
 ```
 
 Usage

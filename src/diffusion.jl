@@ -1,5 +1,5 @@
 # diffusion variance
 
-abstract AbstractDiffusion
+abstract type AbstractDiffusion end
 
 type UnitDiffusion <: AbstractDiffusion end 

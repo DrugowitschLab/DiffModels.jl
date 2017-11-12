@@ -12,8 +12,8 @@ function testpdfequal(d::AbstractDrift, b::AbstractBounds, tmax,
     @test length(g1) == length(g1ref)
     @test length(g2) == length(g2ref)
     for n = 1:length(g1)
-        @test_approx_eq_eps g1[n] g1ref[n] tol
-        @test_approx_eq_eps g2[n] g2ref[n] tol
+        @test g1[n] ≈ g1ref[n] atol=tol
+        @test g2[n] ≈ g2ref[n] atol=tol
     end
 end
 
@@ -26,14 +26,14 @@ dt = 0.005
 tmax = 3.0
 maxn = length(0:dt:tmax)
 
-@test_approx_eq(pdful(ConstDrift(mu, dt), ConstSymBounds(bound, dt), t)[1],
-                pdfu(ConstDrift(mu, dt), ConstSymBounds(bound, dt), t))
-@test_approx_eq(pdful(ConstDrift(mu, dt), ConstSymBounds(bound, dt), t)[2],
-                pdfl(ConstDrift(mu, dt), ConstSymBounds(bound, dt), t))
-@test_approx_eq(pdful(ConstDrift(mu, dt), ConstAsymBounds(bound, -bound, dt), t)[1],
-                pdfu(ConstDrift(mu, dt), ConstAsymBounds(bound, -bound, dt), t))
-@test_approx_eq(pdful(ConstDrift(mu, dt), ConstAsymBounds(bound, -bound, dt), t)[2],
-                pdfl(ConstDrift(mu, dt), ConstAsymBounds(bound, -bound, dt), t))
+@test (pdful(ConstDrift(mu, dt), ConstSymBounds(bound, dt), t)[1] ≈ 
+       pdfu(ConstDrift(mu, dt), ConstSymBounds(bound, dt), t))
+@test (pdful(ConstDrift(mu, dt), ConstSymBounds(bound, dt), t)[2] ≈
+       pdfl(ConstDrift(mu, dt), ConstSymBounds(bound, dt), t))
+@test (pdful(ConstDrift(mu, dt), ConstAsymBounds(bound, -bound, dt), t)[1] ≈
+       pdfu(ConstDrift(mu, dt), ConstAsymBounds(bound, -bound, dt), t))
+@test (pdful(ConstDrift(mu, dt), ConstAsymBounds(bound, -bound, dt), t)[2] ≈
+       pdfl(ConstDrift(mu, dt), ConstAsymBounds(bound, -bound, dt), t))
 
 g1, g2 = pdf(VarDrift(fill(mu, maxn), dt), 
              VarAsymBounds(VarBound(fill(bound, maxn), dt),
@@ -56,10 +56,10 @@ dt = 0.005
 tmax = 3.0
 maxn = length(0:dt:tmax)
 
-@test_approx_eq(pdful(ConstDrift(mu, dt), ConstAsymBounds(bounds[1], -bounds[2], dt), t)[1],
-                pdfu(ConstDrift(mu, dt), ConstAsymBounds(bounds[1], -bounds[2], dt), t))
-@test_approx_eq(pdful(ConstDrift(mu, dt), ConstAsymBounds(bounds[1], -bounds[2], dt), t)[2],
-                pdfl(ConstDrift(mu, dt), ConstAsymBounds(bounds[1], -bounds[2], dt), t))
+@test (pdful(ConstDrift(mu, dt), ConstAsymBounds(bounds[1], -bounds[2], dt), t)[1] ≈
+       pdfu(ConstDrift(mu, dt), ConstAsymBounds(bounds[1], -bounds[2], dt), t))
+@test (pdful(ConstDrift(mu, dt), ConstAsymBounds(bounds[1], -bounds[2], dt), t)[2] ≈
+       pdfl(ConstDrift(mu, dt), ConstAsymBounds(bounds[1], -bounds[2], dt), t))
 
 g1, g2 = pdf(VarDrift(fill(mu, maxn), dt), 
              VarAsymBounds(VarBound(fill(bounds[1], maxn), dt),
