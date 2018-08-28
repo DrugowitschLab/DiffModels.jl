@@ -3,7 +3,7 @@
 # - type hierarchy
 
 using DiffModels
-using Base.Test
+using Test
 
 @test ConstDrift <: AbstractDrift
 @test VarDrift <: AbstractDrift

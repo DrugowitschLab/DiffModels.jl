@@ -15,7 +15,7 @@ struct ConstBound <: AbstractBound
     function ConstBound(b::Real, dt::Real)
         b > zero(b) || error("bound needs to be positive")
         dt > zero(dt) || error("dt needs to be positive")
-        new(float(b), float(dt))
+        return new(float(b), float(dt))
     end
 end
 getbound(b::ConstBound, n::Int) = b.b
@@ -28,16 +28,15 @@ struct VarBound <: AbstractBound
     bg::Vector{Float64}
     dt::Float64
 
-    function VarBound{T1 <: Real, T2 <: Real}(b::AbstractVector{T1},
-                                              bg::AbstractVector{T2},
-                                              dt::Real)
+    function VarBound(b::AbstractVector{T1}, bg::AbstractVector{T2},
+                      dt::Real) where {T1 <: Real, T2 <: Real}
         dt > zero(dt) || error("dt needs to be positive")
         length(b) > 0 || error("bounds need to be of non-zero length")
         length(b) == length(bg) || error("b and bg need to be of same length")
         b[1] > 0.0 || error("b[1] needs to be positive")
-        new(b, bg, float(dt))
+        return new(b, bg, float(dt))
     end
-    VarBound{T <: Real}(b::AbstractVector{T}, dt::Real) = VarBound(b, fdgrad(b, dt), dt)
+    VarBound(b::AbstractVector{T}, dt::Real) where T <: Real = VarBound(b, fdgrad(b, dt), dt)
 end
 getbound(b::VarBound, n::Int) = b.b[n]
 getboundgrad(b::VarBound, n::Int) = b.bg[n]
@@ -56,7 +55,7 @@ struct LinearBound <: AbstractBound
         maxt > zero(maxt) || error("maxt needs to be positive")
         maxn = maxt / dt
         # subtracting dt * bslope ensures that getbound(b, 1) = b0
-        new(b0 - dt * bslope, bslope, dt * bslope, dt,
+        return new(b0 - dt * bslope, bslope, dt * bslope, dt,
             isfinite(maxn) ? ceil(Int, maxn) : typemax(Int))
     end
 end
@@ -96,7 +95,7 @@ struct AsymBounds{T1 <: AbstractBound, T2 <: AbstractBound} <: AbstractBounds
 
     function AsymBounds{T1,T2}(upper::T1, lower::T2) where {T1,T2}
         getdt(upper) == getdt(lower) || error("Bounds need to have equal dt")
-        new(upper, lower)
+        return new(upper, lower)
     end
 end
 getdt(b::AsymBounds) = getdt(b.upper)

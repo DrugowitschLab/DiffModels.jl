@@ -31,9 +31,9 @@ The library provides specialised classes for time-invariant drifts, *mu(t) = mu_
 Installation
 ------------
 
-The easiest way to install DiffModels.jl is by using the Julia Package Manager at the Julia prompt:
+The easiest way to install DiffModels.jl is by using the Julia Package Manager at the Julia Pkg prompt:
 ```
-julia> Pkg.clone("git://github.com/DrugowitschLab/DiffModels.jl.git")
+pkg> add https://github.com/DrugowitschLab/DiffModels.jl
 ```
 
 Usage
@@ -64,12 +64,12 @@ VarBound(b::Vector{Float64}, dt::Real)
 
 Boundary pairs are based on the abstract base class `AbstractBounds`. For such pairs, the following constructors are available:
 ```Julia
-SymBounds{T <: AbstractBound}(b::T)
+SymBounds(b::T) where T <: AbstractBound
 typealias VarSymBounds SymBounds{VarBound}
 typealias LinearSymBounds SymBounds{LinearBound}
 typealias ConstSymBounds SymBounds{ConstBound}
 
-AsymBounds{T1 <: AbstractBound, T2 <: AbstractBound}(upper::T1, lower::T2)
+AsymBounds(upper::T1, lower::T2) where {T1 <: AbstractBound, T2 <: AbstractBound}
 VarAsymBounds AsymBounds{VarBound, VarBound}
 ConstAsymBounds AsymBounds{ConstBound, ConstBound}
 

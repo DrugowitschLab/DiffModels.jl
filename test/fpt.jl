@@ -3,7 +3,7 @@
 # - consistency of first-passage time densities
 
 using DiffModels
-using Base.Test
+using Test
 
 function testpdfequal(d::AbstractDrift, b::AbstractBounds, tmax,
                       g1ref::Vector{Float64}, g2ref::Vector{Float64}, tol)
@@ -71,8 +71,8 @@ testpdfequal(ConstDrift(mu, dt),
              tmax, g1, g2, 1e-4)
 
 g1, g2 = pdf(VarDrift(fill(mu, maxn), dt),
-             VarAsymBounds(VarBound(bounds[1] + bound_slopes[1] * dt * (0:maxn-1), dt), 
-                           VarBound(bounds[2] + bound_slopes[2] * dt * (0:maxn-1), dt)),
+             VarAsymBounds(VarBound(bounds[1] .+ bound_slopes[1] * dt * (0:maxn-1), dt), 
+                           VarBound(bounds[2] .+ bound_slopes[2] * dt * (0:maxn-1), dt)),
              tmax)
 testpdfequal(ConstDrift(mu, dt),
              AsymBounds{LinearBound, LinearBound}(LinearBound(bounds[1], bound_slopes[1], dt),

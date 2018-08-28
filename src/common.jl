@@ -3,10 +3,10 @@
 #
 # Except for the first and last element, all gradients are computed by central
 # finite differences
-function fdgrad{T}(x::AbstractVector{T}, dt::Real)
-    const n = length(x)
+function fdgrad(x::AbstractVector{T}, dt::Real) where T
+    n = length(x)
     GType = typeof((zero(T) - zero(T)) / dt)
-    g = Array{GType}(n)
+    g = Array{GType}(undef, n)
     if n == 1
         g[1] = zero(GType)
     else
@@ -16,5 +16,5 @@ function fdgrad{T}(x::AbstractVector{T}, dt::Real)
         end
         g[n] = (x[n] - x[n-1]) / dt
     end
-    g
+    return g
 end

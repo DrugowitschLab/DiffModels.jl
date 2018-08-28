@@ -2,4 +2,4 @@
 
 abstract type AbstractDiffusion end
 
-type UnitDiffusion <: AbstractDiffusion end 
+mutable struct UnitDiffusion <: AbstractDiffusion end 

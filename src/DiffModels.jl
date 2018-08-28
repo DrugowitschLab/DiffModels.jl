@@ -4,7 +4,7 @@ import Base: rand
 import Distributions: pdf, sampler, twoπ, sqrt2π
 import Distributions: Sampleable, ValueSupport, Univariate, Multivariate
 
-using Compat
+using Compat, SpecialFunctions
 
 export
     # generic types

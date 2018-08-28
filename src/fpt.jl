@@ -26,8 +26,8 @@ struct AsymPDFConstCache <: PDFConstCacheBase
     w::Float64
 
     function AsymPDFConstCache(d::ConstDrift, b::ConstAsymBounds)
-        const mu, bu, bl = getmu(d), getubound(b), getlbound(b)
-        new(abs2(bu - bl), abs2(mu) / 2, mu * bu, mu * bl, -bl / (bu - bl))
+        mu, bu, bl = getmu(d), getubound(b), getlbound(b)
+        return new(abs2(bu - bl), abs2(mu) / 2, mu * bu, mu * bl, -bl / (bu - bl))
     end
 end
 
@@ -46,7 +46,7 @@ pdf_asymfastseries(t::Real, w::Real, tol::Real) =
 
 # Navarro & Fuss (2009), Eq. (6)
 function pdf_asymshortt(t::Real, w::Real, tol::Real)
-    const b = t^-1.5 / sqrt2π
+    b = t^-1.5 / sqrt2π
     tol *= b
     f = w * exp(-w * w / 2t)
     k = 1
@@ -61,7 +61,7 @@ function pdf_asymshortt(t::Real, w::Real, tol::Real)
         tol < abs(incr) || break
         k += 1
     end
-    f * b
+    return f * b
 end
 
 # Navarro & Fuss (2009), Eq. (5)
@@ -74,7 +74,7 @@ function pdf_asymlongt(t::Real, w::Real, tol::Real)
         tol < abs(incr) || break
         k += 1
     end
-    f * π
+    return f * π
 end
 
 struct SymPDFConstCache <: PDFConstCacheBase
@@ -83,14 +83,14 @@ struct SymPDFConstCache <: PDFConstCacheBase
     c3::Float64
 
     function SymPDFConstCache(d::ConstDrift, b::ConstSymBounds)
-        const mu, bound = getmu(d), getbound(b)
+        mu, bound = getmu(d), getbound(b)
         new(4 * abs2(bound), abs2(mu) / 2, mu * bound)
     end
 end
 
 function pdful(c::SymPDFConstCache, t::Real, tol::Real=1.e-29)
-    const g = pdf_symfastseries(t / c.c1, tol) / c.c1
-    exp(c.c3 - c.c2 * t) * g, exp(- c.c3 - c.c2 * t) * g
+    g = pdf_symfastseries(t / c.c1, tol) / c.c1
+    return exp(c.c3 - c.c2 * t) * g, exp(- c.c3 - c.c2 * t) * g
 end
 pdfu(c::SymPDFConstCache, t::Real, tol::Real=1.e-29) =
     exp(c.c3 - c.c2 * t) / c.c1 * pdf_symfastseries(t / c.c1, tol)
@@ -117,7 +117,7 @@ function pdf_symseries(t::Real, a::Real, b::Real, tol::Real)
         tol < incr || break
         twok += 2
     end
-    b * f
+    return b * f
 end
 
 PDFConstCache(d::ConstDrift, b::ConstAsymBounds) = AsymPDFConstCache(d, b)
@@ -129,17 +129,17 @@ pdful(d::ConstDrift, b::ConstBounds, t::Real, tol::Real=1.e-29) = pdful(PDFConst
 
 function pdf(d::ConstDrift, b::ConstBounds, tmax::Real, tol::Real=1.e-29)
     tmax >= zero(tmax) || error("tmax needs to be non-negative")
-    const c = PDFConstCache(d, b)
-    const dt = getdt(d)
+    c = PDFConstCache(d, b)
+    dt = getdt(d)
     @assert getdt(b) == dt
-    const maxn = length(0:dt:tmax)
+    maxn = length(0:dt:tmax)
 
-    gu, gl, t = Array{Float64}(maxn), Array{Float64}(maxn), 0.0
+    gu, gl, t = Array{Float64}(undef, maxn), Array{Float64}(undef, maxn), 0.0
     for n = 1:maxn
         gu[n], gl[n] = pdful(c, t, tol)
         t += dt
     end
-    gu, gl
+    return gu, gl
 end
 
 
@@ -158,13 +158,13 @@ function pdf(d::AbstractDrift, b::AbstractBounds, tmax::Real)
     maxn = length(0:dt:tmax)
     @assert getmaxn(d) >= maxn && getmaxn(b) >= maxn
 
-    g1, g2 = Array{Float64}(maxn), Array{Float64}(maxn)
+    g1, g2 = Array{Float64}(undef, maxn), Array{Float64}(undef, maxn)
     g1[1], g2[1] = 0.0, 0.0
     if maxn == 1
         return g1, g2
     end
 
-    const cΨ = 1.0 / √(twoπ)
+    cΨ = 1.0 / √(twoπ)
     # computes diffusion kernel 2Ψ(b(t), t | y, tau) for parameters
     # mut = drift(t), bgradt = d b(t) / dt, dbm = b(t) - y - m(t) + m(tau),
     # dv = v(t) - v(tau), sqrtdv = √(dv)
@@ -176,14 +176,14 @@ function pdf(d::AbstractDrift, b::AbstractBounds, tmax::Real)
 
     for n = 3:maxn
         g1n, g2n = 0.0, 0.0
-        const mun, mn = getmu(d, n), getm(d, n)
-        const bupn, blon = getubound(b, n), getlbound(b, n)
-        const bupgradn, blogradn = getuboundgrad(b, n), getlboundgrad(b, n)
+        mun, mn = getmu(d, n), getm(d, n)
+        bupn, blon = getubound(b, n), getlbound(b, n)
+        bupgradn, blogradn = getuboundgrad(b, n), getlboundgrad(b, n)
         for j = 2:(n-1)
-            const dv = dt * (n-j)
-            const sqrtdv = √(dv)
-            const dbmu = getm(d, j) - mn - getubound(b, j)
-            const dbml = getm(d, j) - mn - getlbound(b, j)
+            dv = dt * (n-j)
+            sqrtdv = √(dv)
+            dbmu = getm(d, j) - mn - getubound(b, j)
+            dbml = getm(d, j) - mn - getlbound(b, j)
             g1n += g1[j] * _Ψ(mun, bupgradn, bupn + dbmu, dv, sqrtdv) +
                 g2[j] * _Ψ(mun, bupgradn, bupn + dbml, dv, sqrtdv)
             g2n += g1[j] * _Ψ(mun, blogradn, blon + dbmu, dv, sqrtdv) +
@@ -192,5 +192,5 @@ function pdf(d::AbstractDrift, b::AbstractBounds, tmax::Real)
         g1[n] = - _Ψ(mun, bupgradn, bupn - mn, dt * (n-1), √(dt * (n-1))) + dt * g1n
         g2[n] = _Ψ(mun, blogradn, blon - mn, dt * (n-1), √(dt * (n-1))) - dt * g2n
     end
-    g1, g2
+    return g1, g2
 end

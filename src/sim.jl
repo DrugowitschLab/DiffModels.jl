@@ -22,9 +22,9 @@ struct DMBoundsSampler
     sqrtdt::Float64
 
     function DMBoundsSampler(d::AbstractDrift, b::AbstractBounds)
-        const dt = getdt(d)
+        dt = getdt(d)
         @assert dt == getdt(b)
-        new(d, b, √(dt))
+        return new(d, b, √(dt))
     end
 end
 
@@ -40,7 +40,7 @@ function rand(s::DMBoundsSampler)
         end
     end
     # no bound crossing until n - return random sample and Inf
-    Inf, rand() < 0.5 
+    return Inf, rand() < 0.5 
 end
 
 # faster sampler for constant bounds
@@ -60,17 +60,17 @@ struct DMConstSymBoundsNormExpSampler <: DMConstSymBoundsFPTSampler
     F1inf::Float64
 
     function DMConstSymBoundsNormExpSampler(mu::Real)
-        const mu2 = abs2(mu)
-        const tthresh = 0.12+0.5exp(-abs(mu)/3)
-        const a = (3 + √(9 + 4mu2)) / 6
-        const sqrtamu = √((a-1) * mu2 / a)
-        const fourmu2π = (4mu2 + abs2(π)) / 8
-        const Cf1s = √(a) * exp(-sqrtamu)
-        const Cf1l = π / 4fourmu2π
-        const CF1st = Cf1s * erfc(1 / √(2a * tthresh))
-        const F1lt = - expm1(-tthresh * fourmu2π)
-        const F1inf = CF1st + Cf1l * (1 - F1lt)
-        new(mu2, a, sqrtamu, fourmu2π, Cf1s, CF1st, Cf1l, F1lt, F1inf)
+        mu2 = abs2(mu)
+        tthresh = 0.12+0.5exp(-abs(mu)/3)
+        a = (3 + √(9 + 4mu2)) / 6
+        sqrtamu = √((a-1) * mu2 / a)
+        fourmu2π = (4mu2 + abs2(π)) / 8
+        Cf1s = √(a) * exp(-sqrtamu)
+        Cf1l = π / 4fourmu2π
+        CF1st = Cf1s * erfc(1 / √(2a * tthresh))
+        F1lt = - expm1(-tthresh * fourmu2π)
+        F1inf = CF1st + Cf1l * (1 - F1lt)
+        return new(mu2, a, sqrtamu, fourmu2π, Cf1s, CF1st, Cf1l, F1lt, F1inf)
     end
 end
 
@@ -84,7 +84,7 @@ function rand(s::DMConstSymBoundsNormExpSampler)
         else
             # long-time series
             t = -log1p(- (P - s.CF1st)/s.Cf1l - s.F1lt) / s.fourmu2π
-            const π2t8 = abs2(π) * t / 8
+            π2t8 = abs2(π) * t / 8
             !_acceptt(t, exp(-π2t8), π2t8) || return t
         end
     end
@@ -96,41 +96,41 @@ struct DMConstSymBoundsInvNormSampler <: DMConstSymBoundsFPTSampler
 
     function DMConstSymBoundsInvNormSampler(mu::Real)
         @assert mu > 0.0
-        new(1 / abs(mu), 1 / abs2(mu))
+        return new(1 / abs(mu), 1 / abs2(mu))
     end
 end
 
 function rand(s::DMConstSymBoundsInvNormSampler)
     while true
         t = _invgaussrand(s.invabsmu, s.invmu2)
-        const one2t = 1 / 2t
+        one2t = 1 / 2t
         if t < 2.5
             # short-time series, always accept for mu > 1500
             !_acceptt(t, exp(-one2t), one2t) && !(s.invabsmu < 0.000666) || return t
         else
             # long-time series
-            const Cl = -log(π/4) - 0.5log(twoπ)
+            Cl = -log(π/4) - 0.5log(twoπ)
             !_acceptt(t, exp(Cl - one2t - 3log(t)/2), abs2(π) * t / 8) || return t
         end
     end
 end
 
 function fastfptsampler(mu)
-    const absmu = abs(mu)
-    absmu < 1.0 ? DMConstSymBoundsNormExpSampler(absmu) : 
-                  DMConstSymBoundsInvNormSampler(absmu)
+    absmu = abs(mu)
+    return absmu < 1.0 ? DMConstSymBoundsNormExpSampler(absmu) : 
+                         DMConstSymBoundsInvNormSampler(absmu)
 end
 
 # sampler for inverse-Gamma distribution with lambda = 1, mean = mu, mu > 0
 function _invgaussrand(mu, mu2)
-    const y = abs2(randn())
-    const x = mu + 0.5mu2 * y - 0.5mu * sqrt(4mu * y + mu2 * abs2(y))
-    rand() <= 1 / (1 + x / mu) ? x : mu2 / x
+    y = abs2(randn())
+    x = mu + 0.5mu2 * y - 0.5mu * sqrt(4mu * y + mu2 * abs2(y))
+    return rand() <= 1 / (1 + x / mu) ? x : mu2 / x
 end
 
 function _acceptt(t, f, c2)
     @assert c2 > 0.06385320297074884 # log(5/3) / 16, req. for convergence
-    const z = f * rand()
+    z = f * rand()
     b, twok = exp(-c2), 3
     while true
         z < b || return false
@@ -150,10 +150,10 @@ struct DMConstSymBoundsSampler
     fpts::DMConstSymBoundsFPTSampler
 
     function DMConstSymBoundsSampler(d::ConstDrift, b::ConstSymBounds)
-        const mu = getmu(d)
-        const theta = getbound(b)
-        const mutheta = theta * mu
-        new(abs2(theta), 1 / (1 + exp(-2mutheta)), fastfptsampler(mutheta))
+        mu = getmu(d)
+        theta = getbound(b)
+        mutheta = theta * mu
+        return new(abs2(theta), 1 / (1 + exp(-2mutheta)), fastfptsampler(mutheta))
     end
 end
 rand(s::DMConstSymBoundsSampler) = rand(s.fpts) * s.b2, rand() < s.pu
@@ -172,21 +172,21 @@ end
 function rand(s::DMConstAsymBoundsSampler)
     t, x = 0.0, 0.0
     while true
-        const xlo, xup = x - s.blo, s.bup - x
+        xlo, xup = x - s.blo, s.bup - x
         if isapprox(xlo, xup)
             # symmetric bounds, diffusion model in [x - xup, x + xup]
-            const mutheta = xup * s.mu
+            mutheta = xup * s.mu
             return t + abs2(xup) * rand(fastfptsampler(mutheta)),
                    rand() < 1 / (1 + exp(-2mutheta))
         elseif xlo > xup
             # x closer to upper bound, diffusion model in [x - xup, x + xup]
-            const mutheta = xup * s.mu
+            mutheta = xup * s.mu
             t += abs2(xup) * rand(fastfptsampler(mutheta))
             rand() >= 1 / (1 + exp(-2mutheta)) || return t, true
             x -= xup
         else
             # x closer to lower bound, diffusion model in [x - xlo, x + xlo]
-            const mutheta = xlo * s.mu
+            mutheta = xlo * s.mu
             t += abs2(xlo) * rand(fastfptsampler(mutheta))
             rand() <= 1 / (1 + exp(-2mutheta)) || return t, false
             x += xlo

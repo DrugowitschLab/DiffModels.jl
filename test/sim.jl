@@ -4,8 +4,8 @@
 #
 # TODO: add variance testing for asymmetric bounds
 
-using DiffModels
-using Base.Test
+using Statistics, DiffModels
+using Test
 
 nanmean(x) = mean(x[.!isnan.(x)])
 nanvar(x) = var(x[.!isnan.(x)])
@@ -18,9 +18,9 @@ function estimatemoments(d::AbstractDrift, b::AbstractBounds, n)
         t[i], ci = rand(s)
         c[i] = ci ? 1.0 : 0.0
     end
-    [nanmean(t), nanvar(t), mean(c),
-     nanmean(t[c .== 1.0]), nanvar(t[c .== 1.0]),
-     nanmean(t[c .== 0.0]), nanvar(t[c .== 0.0])]
+    return [nanmean(t), nanvar(t), mean(c),
+            nanmean(t[c .== 1.0]), nanvar(t[c .== 1.0]),
+            nanmean(t[c .== 0.0]), nanvar(t[c .== 0.0])]
 end
 
 # symmetric bounds
@@ -31,8 +31,8 @@ function dmsymvart(mu::Real, bound::Real)
     if isapprox(mu, zero(mu))
         return 2abs2(abs2(bound)) / 3
     end
-    const a = mu * bound
-    bound * (tanh(a) - a * abs2(sech(a))) / mu^3
+    a = mu * bound
+    return bound * (tanh(a) - a * abs2(sech(a))) / mu^3
 end
 dmsympubound(mu::Real, bound::Real) = 1 / (1 + exp(-2mu * bound))
 
