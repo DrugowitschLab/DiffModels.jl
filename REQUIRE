@@ -1,4 +1,4 @@
 julia 0.6
 Distributions 0.10.0
-SpecialFunctions 0.7.0
+SpecialFunctions 0.6.0
 Compat 1.0.0

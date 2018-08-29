@@ -31,10 +31,25 @@ The library provides specialised classes for time-invariant drifts, *mu(t) = mu_
 Installation
 ------------
 
+### Julia 0.7.x and above
+
 The easiest way to install DiffModels.jl is by using the Julia Package Manager at the Julia Pkg prompt:
 ```
 pkg> add https://github.com/DrugowitschLab/DiffModels.jl
 ```
+
+### Julia 0.6.x
+
+For installation with Julia 0.6.x, use the following command at the Julia prompt:
+```
+julia> Pkg.clone("git://github.com/DrugowitschLab/DiffModels.jl.git")
+```
+Then call `Pkg.dir()` to find the package installation directly, open a terminal and navigate to this directory. For there, use
+```
+# cd DiffModels
+# git checkout 1cd0b4a418a9d78f6f19442526cb9de91507bbbe
+```
+in the terminal to roll back to the last version compatible with Julia 0.6.x.
 
 Usage
 -----
