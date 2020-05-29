@@ -1,5 +1,6 @@
 name = "DiffModels"
 uuid = "e5f0bcaf-6862-5e3b-a693-d633b260d7d6"
+version = "0.4.0"
 
 [deps]
 Compat = "34da2185-b29b-5c13-b0c7-acf172513d20"
